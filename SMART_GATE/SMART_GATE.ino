@@ -4,15 +4,15 @@
 #include <time.h>
 #include <Keypad.h>
 
-
 #define DEBOUNCE_TIME 10
 unsigned long lastKeyPressTime = 0;
+
 // Firebase credentials
 #define FIREBASE_HOST "https://smart-gate-f1f24-default-rtdb.firebaseio.com"
-#define FIREBASE_AUTH "p4b5ePyxVjvXkpxZfqJMUfVfGuD6DQB7yqxAb5el"
+#define FIREBASE_AUTH "p4b5ePyxVJvXkpxZfqJMUfVfGuD6DQB7yqxAb5el"
 
-const char* ssid = "******";
-const char* password = "******";
+const char* ssid = "iPhonekd";
+const char* password = "PV=nRT889";
 
 // Define GPIO pins
 #define GATE1_PIN D5 // GPIO pin connected to Gate 1 servo
@@ -88,8 +88,6 @@ void setup() {
   delay(100);
 }
 
-
-
 void loop() {
   // Read keypad input
   char key = keypad.getKey();
@@ -160,20 +158,17 @@ void loop() {
   checkFirebaseState();
 }
 
-
-
 void checkFirebaseState() {
   // Listen for changes in Firebase gate state
   if (Firebase.getBool(firebaseData, GATE_STATE_NODE "/isGate1Open")) {
     bool isGate1Open = firebaseData.boolData();
-   // Serial.print("Gate1 state from Firebase: ");
-   // Serial.println(isGate1Open);
-    if (isGate1Open && !gate1State) {
-      openGate1();
-      gate1State = true;
-    } else if (!isGate1Open && gate1State) {
-      closeGate1();
-      gate1State = false;
+    if (isGate1Open != gate1State) {
+      if (isGate1Open) {
+        openGate1();
+      } else {
+        closeGate1();
+      }
+      gate1State = isGate1Open;
     }
   } else {
     Serial.print("Failed to get Gate1 state: ");
@@ -182,14 +177,13 @@ void checkFirebaseState() {
 
   if (Firebase.getBool(firebaseData, GATE_STATE_NODE "/isGate2Open")) {
     bool isGate2Open = firebaseData.boolData();
-   // Serial.print("Gate2 state from Firebase: ");
-   // Serial.println(isGate2Open);
-    if (isGate2Open && !gate2State) {
-      openGate2();
-      gate2State = true;
-    } else if (!isGate2Open && gate2State) {
-      closeGate2();
-      gate2State = false;
+    if (isGate2Open != gate2State) {
+      if (isGate2Open) {
+        openGate2();
+      } else {
+        closeGate2();
+      }
+      gate2State = isGate2Open;
     }
   } else {
     Serial.print("Failed to get Gate2 state: ");
