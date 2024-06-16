@@ -26,6 +26,7 @@ const char* password = "PV=nRT889";
 
 // Define Firebase node
 #define GATE_STATE_NODE "gates/main_gate"
+#define NOTIFICATIONS_NODE "/notifications"
 
 // Create Servo objects
 Servo gate1Servo;
@@ -49,6 +50,13 @@ byte colPins[COLS] = {D0, D1, D2, D3}; // Connect to the column pins of the keyp
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 String inputSequence = "";
+
+void openGate1(bool fromKeypad = false);
+void closeGate1(bool fromKeypad = false);
+void openGate2(bool fromKeypad = false);
+void closeGate2(bool fromKeypad = false);
+void checkFirebaseState();
+void initializeGateState();
 
 void setup() {
   Serial.begin(9600);
@@ -104,42 +112,30 @@ void loop() {
       if (inputSequence.endsWith("123")) {
         Serial.println("Toggling Gate 1");
         if (gate1State) {
-          closeGate1();
-          Firebase.setBool(firebaseData, GATE_STATE_NODE "/isGate1Open", false);
+          closeGate1(true);
         } else {
-          openGate1();
-          Firebase.setBool(firebaseData, GATE_STATE_NODE "/isGate1Open", true);
-          Firebase.setString(firebaseData, GATE_STATE_NODE "/lastOpenedGate1", getTimeStamp());
+          openGate1(true);
         }
         inputSequence = ""; // Clear input sequence after action
       } else if (inputSequence.endsWith("432")) {
         Serial.println("Toggling Gate 2");
         if (gate2State) {
-          closeGate2();
-          Firebase.setBool(firebaseData, GATE_STATE_NODE "/isGate2Open", false);
+          closeGate2(true);
         } else {
-          openGate2();
-          Firebase.setBool(firebaseData, GATE_STATE_NODE "/isGate2Open", true);
-          Firebase.setString(firebaseData, GATE_STATE_NODE "/lastOpenedGate2", getTimeStamp());
+          openGate2(true);
         }
         inputSequence = ""; // Clear input sequence after action
       } else if (inputSequence.endsWith("324")) {
         Serial.println("Toggling both Gates");
         if (gate1State) {
-          closeGate1();
-          Firebase.setBool(firebaseData, GATE_STATE_NODE "/isGate1Open", false);
+          closeGate1(true);
         } else {
-          openGate1();
-          Firebase.setBool(firebaseData, GATE_STATE_NODE "/isGate1Open", true);
-          Firebase.setString(firebaseData, GATE_STATE_NODE "/lastOpenedGate1", getTimeStamp());
+          openGate1(true);
         }
         if (gate2State) {
-          closeGate2();
-          Firebase.setBool(firebaseData, GATE_STATE_NODE "/isGate2Open", false);
+          closeGate2(true);
         } else {
-          openGate2();
-          Firebase.setBool(firebaseData, GATE_STATE_NODE "/isGate2Open", true);
-          Firebase.setString(firebaseData, GATE_STATE_NODE "/lastOpenedGate2", getTimeStamp());
+          openGate2(true);
         }
         inputSequence = ""; // Clear input sequence after action
       }
@@ -224,6 +220,100 @@ void initializeGateState() {
   delay(2500);
 }
 
+// String getTimeStamp() {
+//   time_t now = time(nullptr);
+//   struct tm* p_tm = localtime(&now);
+
+//   char timestamp[30];
+//   sprintf(timestamp, "%04d-%02d-%02dT%02d:%02d:%02d",
+//           (1900 + p_tm->tm_year),
+//           (1 + p_tm->tm_mon),
+//           p_tm->tm_mday,
+//           p_tm->tm_hour,
+//           p_tm->tm_min,
+//           p_tm->tm_sec);
+
+//   return String(timestamp);
+// }
+
+void openGate1(bool fromKeypad) {
+  Serial.println("Opening Gate 1");
+  for (int angle = GATE1_CLOSED_ANGLE; angle <= GATE1_OPEN_ANGLE; angle++) {
+    gate1Servo.write(angle);
+    delay(25); // Adjust the delay if needed for smoother movement
+  }
+  gate1State = true;
+  Firebase.setBool(firebaseData, GATE_STATE_NODE "/isGate1Open", true);
+  Firebase.setString(firebaseData, GATE_STATE_NODE "/lastOpenedGate1", getTimeStamp());
+  
+  FirebaseJson notification;
+  notification.set("title", "Gate 1 Opened");
+  notification.set("body", "Gate 1 was opened via " + String(fromKeypad ? "Keypad" : "Mobile App"));
+  notification.set("timestamp", getTimeStamp());
+  
+  if (!Firebase.pushJSON(firebaseData, NOTIFICATIONS_NODE, notification)) {
+    Serial.println("Failed to push notification: " + firebaseData.errorReason());
+  }
+}
+
+void closeGate1(bool fromKeypad) {
+  Serial.println("Closing Gate 1");
+  for (int angle = GATE1_OPEN_ANGLE; angle >= GATE1_CLOSED_ANGLE; angle--) {
+    gate1Servo.write(angle);
+    delay(25); // Adjust the delay if needed for smoother movement
+  }
+  gate1State = false;
+  Firebase.setBool(firebaseData, GATE_STATE_NODE "/isGate1Open", false);
+  
+  FirebaseJson notification;
+  notification.set("title", "Gate 1 Closed");
+  notification.set("body", "Gate 1 was closed via " + String(fromKeypad ? "Keypad" : "Mobile App"));
+  notification.set("timestamp", getTimeStamp());
+  
+  if (!Firebase.pushJSON(firebaseData, NOTIFICATIONS_NODE, notification)) {
+    Serial.println("Failed to push notification: " + firebaseData.errorReason());
+  }
+}
+
+void openGate2(bool fromKeypad) {
+  Serial.println("Opening Gate 2");
+  for (int angle = GATE2_CLOSED_ANGLE; angle <= GATE2_OPEN_ANGLE; angle++) {
+    gate2Servo.write(angle);
+    delay(25); // Adjust the delay if needed for smoother movement
+  }
+  gate2State = true;
+  Firebase.setBool(firebaseData, GATE_STATE_NODE "/isGate2Open", true);
+  Firebase.setString(firebaseData, GATE_STATE_NODE "/lastOpenedGate2", getTimeStamp());
+  
+  FirebaseJson notification;
+  notification.set("title", "Gate 2 Opened");
+  notification.set("body", "Gate 2 was opened via " + String(fromKeypad ? "Keypad" : "Mobile App"));
+  notification.set("timestamp", getTimeStamp());
+  
+  if (!Firebase.pushJSON(firebaseData, NOTIFICATIONS_NODE, notification)) {
+    Serial.println("Failed to push notification: " + firebaseData.errorReason());
+  }
+}
+
+void closeGate2(bool fromKeypad) {
+  Serial.println("Closing Gate 2");
+  for (int angle = GATE2_OPEN_ANGLE; angle >= GATE2_CLOSED_ANGLE; angle--) {
+    gate2Servo.write(angle);
+    delay(25); // Adjust the delay if needed for smoother movement
+  }
+  gate2State = false;
+  Firebase.setBool(firebaseData, GATE_STATE_NODE "/isGate2Open", false);
+  
+  FirebaseJson notification;
+  notification.set("title", "Gate 2 Closed");
+  notification.set("body", "Gate 2 was closed via " + String(fromKeypad ? "Keypad" : "Mobile App"));
+  notification.set("timestamp", getTimeStamp());
+  
+  if (!Firebase.pushJSON(firebaseData, NOTIFICATIONS_NODE, notification)) {
+    Serial.println("Failed to push notification: " + firebaseData.errorReason());
+  }
+}
+
 String getTimeStamp() {
   time_t now = time(nullptr);
   struct tm* p_tm = localtime(&now);
@@ -238,40 +328,4 @@ String getTimeStamp() {
           p_tm->tm_sec);
 
   return String(timestamp);
-}
-
-void openGate1() {
-  Serial.println("Opening Gate 1");
-  for (int angle = GATE1_CLOSED_ANGLE; angle <= GATE1_OPEN_ANGLE; angle++) {
-    gate1Servo.write(angle);
-    delay(25); // Adjust the delay if needed for smoother movement
-  }
-  gate1State = true;
-}
-
-void closeGate1() {
-  Serial.println("Closing Gate 1");
-  for (int angle = GATE1_OPEN_ANGLE; angle >= GATE1_CLOSED_ANGLE; angle--) {
-    gate1Servo.write(angle);
-    delay(25); // Adjust the delay if needed for smoother movement
-  }
-  gate1State = false;
-}
-
-void openGate2() {
-  Serial.println("Opening Gate 2");
-  for (int angle = GATE2_CLOSED_ANGLE; angle <= GATE2_OPEN_ANGLE; angle++) {
-    gate2Servo.write(angle);
-    delay(25); // Adjust the delay if needed for smoother movement
-  }
-  gate2State = true;
-}
-
-void closeGate2() {
-  Serial.println("Closing Gate 2");
-  for (int angle = GATE2_OPEN_ANGLE; angle >= GATE2_CLOSED_ANGLE; angle--) {
-    gate2Servo.write(angle);
-    delay(25); // Adjust the delay if needed for smoother movement
-  }
-  gate2State = false;
 }

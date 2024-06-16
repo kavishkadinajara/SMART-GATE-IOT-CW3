@@ -35,16 +35,16 @@ class NotificationService with ChangeNotifier {
       body: body,
       timestamp: DateTime.now(),
     );
-    try {
-      await _databaseReference.push().set({
-        'title': title,
-        'body': body,
-        'timestamp': newNotification.timestamp.toIso8601String(),
-      });
-      _notifications.add(newNotification);
-      notifyListeners();
-    } catch (error) {
-      print('Failed to add notification: $error');
-    }
+    // try {
+    //   await _databaseReference.push().set({
+    //     'title': title,
+    //     'body': body,
+    //     'timestamp': newNotification.timestamp.toIso8601String(),
+    //   });
+    //   _notifications.add(newNotification);
+    //   notifyListeners();
+    // } catch (error) {
+    //   print('Failed to add notification: $error');
+    // }
   }
 }
