@@ -39,37 +39,41 @@ class GateProvider with ChangeNotifier {
     super.dispose();
   }
 
-  void openGate1() {
+  void openGate1({bool fromKeypad = false}) {
     _updateGateState(
       _gateState.copyWith(
         isGate1Open: true,
         lastOpenedGate1: DateTime.now(),
       ),
       "Gate 1 Opened",
-      "Gate 1 was opened at ${DateTime.now()}",
+      "Gate 1 was opened at ${DateTime.now()} via ${fromKeypad ? 'Keypad' : 'Mobile App'}",
     );
   }
 
-  void closeGate1() {
+  void closeGate1({bool fromKeypad = false}) {
     _updateGateState(
       _gateState.copyWith(isGate1Open: false),
+      "Gate 1 Closed",
+      "Gate 1 was closed at ${DateTime.now()} via ${fromKeypad ? 'Keypad' : 'Mobile App'}",
     );
   }
 
-  void openGate2() {
+  void openGate2({bool fromKeypad = false}) {
     _updateGateState(
       _gateState.copyWith(
         isGate2Open: true,
         lastOpenedGate2: DateTime.now(),
       ),
       "Gate 2 Opened",
-      "Gate 2 was opened at ${DateTime.now()}",
+      "Gate 2 was opened at ${DateTime.now()} via ${fromKeypad ? 'Keypad' : 'Mobile App'}",
     );
   }
 
-  void closeGate2() {
+  void closeGate2({bool fromKeypad = false}) {
     _updateGateState(
       _gateState.copyWith(isGate2Open: false),
+      "Gate 2 Closed",
+      "Gate 2 was closed at ${DateTime.now()} via ${fromKeypad ? 'Keypad' : 'Mobile App'}",
     );
   }
 
