@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "830597327708",
+    "firebase_url": "https://smart-gate-f1f24-default-rtdb.firebaseio.com",
+    "project_id": "smart-gate-f1f24",
+    "storage_bucket": "smart-gate-f1f24.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:830597327708:android:959ae24b456acf201eaf99",
+        "android_client_info": {
+          "package_name": "com.example.smart_gate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBr-qr7QVP9c6zZNT902bQYsCVX8ylW8oI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
