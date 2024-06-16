@@ -11,8 +11,8 @@ unsigned long lastKeyPressTime = 0;
 #define FIREBASE_HOST "https://smart-gate-f1f24-default-rtdb.firebaseio.com"
 #define FIREBASE_AUTH "p4b5ePyxVjvXkpxZfqJMUfVfGuD6DQB7yqxAb5el"
 
-const char* ssid = "iPhonekd";
-const char* password = "PV=nRT889";
+const char* ssid = "******";
+const char* password = "******";
 
 // Define GPIO pins
 #define GATE1_PIN D5 // GPIO pin connected to Gate 1 servo
