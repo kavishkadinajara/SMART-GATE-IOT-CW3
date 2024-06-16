@@ -13,7 +13,8 @@ class NotificationScreen extends StatelessWidget {
       ),
       body: Consumer<NotificationService>(
         builder: (context, notificationService, child) {
-          final notifications = notificationService.notifications;
+          // Reverse the notifications list to display the most recent one at the top
+          final notifications = notificationService.notifications.reversed.toList();
 
           if (notifications.isEmpty) {
             return const Center(
